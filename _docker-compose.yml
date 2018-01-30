@@ -1,0 +1,38 @@
+version: '2'
+
+volumes:
+  nextcloud:
+  db:
+
+services:
+  db:
+    image: lsioarmhf/mariadb
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=utopistedebout
+      - MYSQL_PASSWORD=utopistedebout
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+  app:  
+    image: nextcloud:fpm
+    links:
+      - db
+    volumes:
+      - nextcloud:/var/www/html
+    restart: always
+
+  web:
+    image: nginx
+    ports:
+      - 8080:80
+      - 443:443
+    links:
+      - app
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    volumes_from:
+      - app
+    restart: always
